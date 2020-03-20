@@ -5,6 +5,7 @@ import { Transition } from 'react-native-reanimated';
 
 import Login from './pages/Login';
 import CreateAccount from './pages/CreateAccount';
+import ImageManipulation from './components/images/ImageManipulation';
 
 const Routes = createStackNavigator(
     {
@@ -17,7 +18,14 @@ const Routes = createStackNavigator(
         CreateAccount: {
             screen: CreateAccount,
             navigationOptions: {
-                title: 'Cadastre-se'
+                title: 'Cadastre-se',
+                headerTitleAlign: 'center'
+            }
+        },
+        ImageManipulation: {
+            screen: ImageManipulation,
+            navigationOptions: {
+                headerShown: false
             }
         }
     }

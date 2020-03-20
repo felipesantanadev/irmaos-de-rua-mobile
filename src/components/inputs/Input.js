@@ -96,4 +96,4 @@ const blurStyles = StyleSheet.create({
     }
 })
 
-export default Input;
+export { Input };

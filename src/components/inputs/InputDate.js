@@ -24,8 +24,7 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
         setShow(Platform.OS === 'ios');
         setDate(getDateString(currentDate));
     };
-
-    // Ajustes
+    
     const [style, setStyle] = useState(styles);
 
     function onFocus() {
@@ -71,7 +70,6 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
             setStyle(blurStyles);
         }
       }, [fieldName, registerField]);
-      // End Ajustes
 
     return (
         <View>
@@ -136,4 +134,4 @@ const blurStyles = StyleSheet.create({
     }
 })
 
-export default InputDate;
+export { InputDate };

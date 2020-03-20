@@ -3,7 +3,7 @@ import { TouchableWithoutFeedback, Keyboard, Text, StyleSheet, Image, View, Dime
 
 import DefaultButton from '../components/buttons/DefaultButton';
 import SecondaryButton from '../components/buttons/SecondaryButton';
-import Input from  '../components/inputs/Input';
+import { Input } from  '../components/inputs';
 import { Form } from '@unform/mobile';
 
 const Login = (props) => {
