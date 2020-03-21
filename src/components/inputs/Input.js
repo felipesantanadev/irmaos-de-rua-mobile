@@ -45,7 +45,12 @@ function Input({ name, label, ...rest }) {
 
       return (
         <>
-          {(label) && <Text style={[style.text, {
+          {(error) && <Text style={[{
+                                 color: 'red',
+                                 marginBottom: rest.bottom ? rest.bottom : 0,
+                                 marginTop: rest.top ? rest.top : 0
+                             }]}>{error}</Text>}
+          {(label && !error) && <Text style={[style.text, {
                                  marginBottom: rest.bottom ? rest.bottom : 0,
                                  marginTop: rest.top ? rest.top : 0
                              }]}>{label}</Text>}
@@ -59,6 +64,7 @@ function Input({ name, label, ...rest }) {
                              }]} 
                      ref={inputRef} 
                      defaultValue={defaultValue} 
+                     keyboardType={rest.type ? rest.type : "default"}
                      {...rest} />
         </>
       );

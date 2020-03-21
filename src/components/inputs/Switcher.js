@@ -20,30 +20,33 @@ const Switcher = ({label, name, bottom, top}) => {
         }
 
         setValue(newValue);
+        inputRef.current._lastNativeValue = newValue;
     }
 
     useEffect(() => {
         registerField({
           name: fieldName,
           ref: inputRef.current,
-          path: '_lastNativeText',
+          path: '_lastNativeValue ',
           getValue(ref) {
-            return ref._lastNativeText || '';
+            return ref._lastNativeValue || false;
           },
           setValue(ref, value) {
-            ref.setNativeProps({ text: value });
-            ref._lastNativeText = value;
+            ref.setNativeProps({ value: value });
+            ref._lastNativeValue = value;
           },
           clearValue(ref) {
-            ref.setNativeProps({ text: '' });
-            ref._lastNativeText = '';
+            ref.setNativeProps({ value: false });
+            ref._lastNativeValue = false;
           },
         });
       }, [fieldName, registerField]);
 
     return(
         <View style={styles.view}>
-            <Text style={styles.label}>{label}</Text>
+            {(error) && <Text  style={[styles.label, { color: 'red' }]}>{error}</Text>}
+            { (label && !error) && <Text style={styles.label}>{label}</Text> }
+            
             {
                 Platform.OS === "ios" ? <Switch value={value} ref={inputRef}
                                                 style={[styles.switch, { marginBottom: bottom, marginTop: top}]} 

@@ -6,10 +6,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useField } from '@unform/core';
 
 const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
-    const [show, setShow] = useState(false);
-
+    const inputRef = useRef(null);
+    const { fieldName, registerField, defaultValue = '', error } = useField(name);
+    
     const getDateString = (dateToConvert) => {
-        return `${String(dateToConvert.getDate()).padStart(2, '0')}/${dateToConvert.getMonth() + 1}/${dateToConvert.getFullYear()}`;
+        return `${String(dateToConvert.getDate()).padStart(2, '0')}/${String(dateToConvert.getMonth() + 1).padStart(2, '0')}/${dateToConvert.getFullYear()}`;
     }
 
     const stringToDate = () => {
@@ -17,12 +18,15 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
         return new Date(parseInt(splittedDate[2]), parseInt(splittedDate[1]) - 1, parseInt(splittedDate[0]));
     }
 
-    const [date, setDate] = useState(getDateString(new Date()));
+    const [date, setDate] = useState(rest.defaultValue ? rest.defaultValue : getDateString(new Date()));
+    const [show, setShow] = useState(false);
+
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
         setShow(Platform.OS === 'ios');
         setDate(getDateString(currentDate));
+        inputRef.current._lastNativeText = date;
     };
     
     const [style, setStyle] = useState(styles);
@@ -44,9 +48,6 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
         }
     }
 
-    const inputRef = useRef(null);
-    const { fieldName, registerField, defaultValue = '', error } = useField(name);
-
     useEffect(() => {
         setShow(Platform.OS === 'ios');
         registerField({
@@ -54,27 +55,34 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
           ref: inputRef.current,
           path: '_lastNativeText',
           getValue(ref) {
-            return ref._lastNativeText || '';
+            return ref._lastNativeText || defaultValue;
           },
           setValue(ref, value) {
             ref.setNativeProps({ text: value });
             ref._lastNativeText = value;
           },
           clearValue(ref) {
-            ref.setNativeProps({ text: '' });
-            ref._lastNativeText = '';
+            ref.setNativeProps({ text: defaultValue });
+            ref._lastNativeText = defaultValue;
           },
         });
 
         if(rest.defaultValue != undefined && rest.defaultValue != ""){
             setStyle(blurStyles);
         }
+
+        inputRef.current._lastNativeText = date;
       }, [fieldName, registerField]);
 
     return (
         <View>
             <>
-                {(label) && <Text style={[style.text, {
+                {(error) && <Text style={[{
+                                    color: 'red',
+                                    marginBottom: rest.bottom ? rest.bottom : 0,
+                                    marginTop: rest.top ? rest.top : 0
+                                }]}>{error}</Text>}
+                {(label && !error) && <Text style={[style.text, {
                                         marginBottom: bottom ? bottom : 0,
                                         marginTop: top ? top : 0
                                     }]}>{label}</Text>}
@@ -87,10 +95,8 @@ const InputDate = ({label, name, top, bottom, placeholder, ...rest}) => {
                                         marginTop: top ? top : 0
                                     }]} 
                             ref={inputRef} 
-                            defaultValue={date} 
-                            placeholder={placeholder}
                             editable={!show}
-                            {...rest} />
+                            defaultValue={date} />
             </>
             {show && (
             <DateTimePicker

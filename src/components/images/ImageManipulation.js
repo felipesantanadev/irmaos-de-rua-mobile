@@ -11,6 +11,9 @@ const ImageManipulation = ({navigation, uri}) => {
 
     const onToggleModal = () => {
         setIsVisible(!isVisible);
+        if(!isVisible == false){
+            navigation.goBack();
+        }
     }
 
     useEffect(() => {

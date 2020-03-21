@@ -1,28 +1,77 @@
-import React, { useRef } from 'react';
-import { TouchableWithoutFeedback, Keyboard, Text, StyleSheet, Image, View, Dimensions } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { TouchableWithoutFeedback, Keyboard, Text, StyleSheet, Image, View, Dimensions, Alert } from 'react-native';
 
 import DefaultButton from '../components/buttons/DefaultButton';
 import SecondaryButton from '../components/buttons/SecondaryButton';
 import { Input } from  '../components/inputs';
 import { Form } from '@unform/mobile';
+import * as Yup from 'yup';
+import ValidationHandler from '../utils/ValidationHandler';
+import ApiService from '../services/ApiService';
+import { StoreUser } from '../services/IdentityServer';
+import Loader from '../components/loaders/Loader';
+import AlertAsync from '../components/alerts/AlertAsync';
 
 const Login = (props) => {
+    const [loading, setLoading] = useState(false);
     const formRef = useRef(null);
-    var {width, height} = Dimensions.get('window');
+
+    var { width } = Dimensions.get('window');
     var cookieLoverRatio = width / 1000; // 1000 is the current image width
     var cookieLoverImageHeight = 836;
     var bluePathRatio = width / 1000;
     var bluePathHeight = 1038;
 
+    const schema = Yup.object().shape({
+        email: Yup.string().email('E-mail inválido').required('E-mail obrigatório'),
+        password: Yup.string().required("Senha obrigatória")
+    });
+
+    const login = async (data) => {
+        await ValidationHandler(formRef, schema, data, async () => {
+            setLoading(true);
+
+            var response = await ApiService.post('/auth', {
+                Username: data.email,
+                Password: data.password,
+                GrantType: "password"
+            });
+
+            if(response.data.errorMessage) {
+                const alertResult = await AlertAsync("Falha no login",
+                                                      response.data.errorMessage,
+                                                      "ok");
+                if(alertResult === "ok"){
+                    setLoading(false);
+                }
+            }
+            else {
+                setLoading(false);
+                StoreUser(data.email, 
+                    response.data.result.token, 
+                    response.data.result.expiration, 
+                    response.data.result.refreshToken, 
+                    response.data.result.roles);
+            }
+        });
+    }
+
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()} accessible={true}>
             <View style={styles.content}>
-                <Form ref={formRef}>
+                <Loader visible={loading} 
+                        background="#007AFF"
+                        animationSource={require("../../assets/lotties/loading.json")}
+                        animationStyle={styles.lottie}
+                        speed={1}
+                        loop={true}
+                        message="Entrando..." />
+                <Form ref={formRef} onSubmit={login}>
                     <View style={styles.view}>
                         <Text style={styles.title}>Irmãos de Rua</Text>
-                        <Input label="E-mail" name="email" type="email" bottom={10} />
+                        <Input label="E-mail" name="email" type="email-address" bottom={10} />
                         <Input label="Senha" name="password" bottom={10} secureTextEntry={true} />
-                        <DefaultButton text="Entrar" bottom={20} />
+                        <DefaultButton text="Entrar" bottom={20} onClick={() => formRef.current.submitForm()} />
                         <SecondaryButton text="Cadastre-se" onClick={() => props.navigation.navigate('CreateAccount')} />
                     </View>
                     <Image source={require('../../assets/images/cookie_lover.png')} 
@@ -79,6 +128,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         position: 'absolute',
         zIndex: 1
+    },
+    lottie: {
+        width: 100,
+        height: 100
     }
 })
 

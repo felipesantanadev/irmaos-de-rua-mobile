@@ -12,36 +12,37 @@ const Select = ({label, name, options, top, bottom, placeholder, ...rest}) => {
         registerField({
           name: fieldName,
           ref: inputRef.current,
-          path: '_lastNativeText',
+          path: 'props.selectedValue',
           getValue(ref) {
-            return ref._lastNativeText || '';
+            return ref.props.selectedValue;
           },
           setValue(ref, value) {
-            ref.setNativeProps({ text: value });
-            ref._lastNativeText = value;
-          },
-          clearValue(ref) {
-            ref.setNativeProps({ text: '' });
-            ref._lastNativeText = '';
+            ref.props.selectedValue = value;
           },
         });
       }, [fieldName, registerField]);
 
     return (
         <>
-            {(label) && <Text style={{color: '#D1D1D6', fontSize: 14}}>{label}</Text>}
+            {(error) && <Text style={{color: 'red', fontSize: 14}}>{error}</Text>}
+            {(label && !error) && <Text style={{color: '#D1D1D6', fontSize: 14}}>{label}</Text>}
 
-            <Picker ref={inputRef} onValueChange={(itemValue) => setValue(itemValue)} 
+            <Picker ref={inputRef} onValueChange={(itemValue) => {
+                                                        setValue(itemValue);
+                                                        inputRef.current.props.selectedValue = itemValue;
+                                                    }} 
                     selectedValue={value} style={[
-                Platform.OS === "ios" ? iOSStyle.input : androidStyle.input
-            , {
-                marginBottom: bottom ? bottom : 0,               marginTop: top ? top : 0
-            }]} itemStyle={{ height: 120, padding: 0, borderTopColor: '#00000000', borderBottomColor: '#00000000' }}>
-                {
-                    pickerOptions.map((item, key) => (
-                        <Picker.Item key={key} label={item.label} value={item.value} />
-                    ))
-                }
+                                                        Platform.OS === "ios" ? iOSStyle.input : androidStyle.input
+                                                    , {
+                                                        marginBottom: bottom ? bottom : 0, marginTop: top ? top : 0
+                                                    }]} 
+                    itemStyle={{ height: 120, padding: 0, borderTopColor: '#00000000', borderBottomColor: '#00000000' }}>
+                    
+                    {
+                        pickerOptions.map((item, key) => (
+                            <Picker.Item key={key} label={item.label} value={item.value} />
+                        ))
+                    }
             </Picker>
         </>
     );

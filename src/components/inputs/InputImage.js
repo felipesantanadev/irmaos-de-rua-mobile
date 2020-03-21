@@ -3,8 +3,6 @@ import { StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useField } from '@unform/core';
-import * as ImageManipulator from 'expo-image-manipulator';
-import { useDimensions } from '@react-native-community/hooks';
 
 const InputImage = ({navigation, useImageManipulation, width, height, align, top, bottom, name, label, ...rest}) => {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -37,8 +35,8 @@ const InputImage = ({navigation, useImageManipulation, width, height, align, top
     }
 
     const getManipulatedImage = async (image) => {
-        //const result = await ImageManipulator.manipulateAsync(image.uri, [], { base64: true })
         setSelectedImage(image.uri);
+        inputRef.current._lastNativeText = image.uri;
     }
 
     const inputRef = useRef(null);
