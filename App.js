@@ -1,10 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
 import { StatusBar, YellowBox } from 'react-native';
-import Routes from './src/routes';
-
+import RootPage from './src/pages/RootPage';
 import * as Font from 'expo-font';
+import { AuthProvider } from './src/context/AuthContext';
 
 YellowBox.ignoreWarnings([
   'Unrecognized WebSocket'
@@ -31,13 +29,11 @@ export default function App() {
   return (
     <>
       {
-        dataLoaded ? (
-          <>
-            <StatusBar barStyle="dark-content"  backgroundColor="#FFF" />
-            <Routes />
-          </>
-        )
-        : null
+        dataLoaded && 
+        <AuthProvider>
+          <StatusBar barStyle="dark-content"  backgroundColor="#FFF" />
+          <RootPage />
+        </AuthProvider>
       }
     </>
   );

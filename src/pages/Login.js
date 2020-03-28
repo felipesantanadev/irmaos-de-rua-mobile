@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { TouchableWithoutFeedback, Keyboard, Text, StyleSheet, Image, View, Dimensions, Alert } from 'react-native';
+import React, { useRef, useState, useContext, useEffect } from 'react';
+import { TouchableWithoutFeedback, Keyboard, Text, StyleSheet, Image, View, Dimensions, SafeAreaView } from 'react-native';
 
 import DefaultButton from '../components/buttons/DefaultButton';
 import SecondaryButton from '../components/buttons/SecondaryButton';
@@ -8,11 +8,13 @@ import { Form } from '@unform/mobile';
 import * as Yup from 'yup';
 import ValidationHandler from '../utils/ValidationHandler';
 import ApiService from '../services/ApiService';
-import { StoreUser } from '../services/IdentityServer';
+import { StoreUser, Profile } from '../services/IdentityServer';
 import Loader from '../components/loaders/Loader';
 import AlertAsync from '../components/alerts/AlertAsync';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = (props) => {
+    const [token, setToken] = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
     const formRef = useRef(null);
 
@@ -29,29 +31,43 @@ const Login = (props) => {
 
     const login = async (data) => {
         await ValidationHandler(formRef, schema, data, async () => {
-            setLoading(true);
+            try {
+                setLoading(true);
 
-            var response = await ApiService.post('/auth', {
-                Username: data.email,
-                Password: data.password,
-                GrantType: "password"
-            });
+                var response = await ApiService.post('/auth', {
+                    Username: data.email,
+                    Password: data.password,
+                    GrantType: "password"
+                });
 
-            if(response.data.errorMessage) {
-                const alertResult = await AlertAsync("Falha no login",
-                                                      response.data.errorMessage,
+                if(response.data.errorMessage) {
+                    const alertResult = await AlertAsync("Falha no login",
+                                                        response.data.errorMessage,
+                                                        "ok");
+                    if(alertResult === "ok"){
+                        setLoading(false);
+                    }
+                }
+                else {
+                    setLoading(false);
+
+                    await StoreUser(response.data.result.userId, data.email, 
+                        response.data.result.token, 
+                        response.data.result.expiration, 
+                        response.data.result.refreshToken, 
+                        response.data.result.refreshTokenExpiration, 
+                        response.data.result.roles);
+                    
+                    await Profile(true);
+                    setToken(response.data.result.token);
+                }
+            } catch(err) {
+                const alertResult = await AlertAsync("Erro de login",
+                                                      "Tente novamente",
                                                       "ok");
                 if(alertResult === "ok"){
                     setLoading(false);
                 }
-            }
-            else {
-                setLoading(false);
-                StoreUser(data.email, 
-                    response.data.result.token, 
-                    response.data.result.expiration, 
-                    response.data.result.refreshToken, 
-                    response.data.result.roles);
             }
         });
     }

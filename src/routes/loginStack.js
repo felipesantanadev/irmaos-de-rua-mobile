@@ -1,13 +1,11 @@
-import React from 'react';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
-import { Transition } from 'react-native-reanimated';
 
-import Login from './pages/Login';
-import CreateAccount from './pages/CreateAccount';
-import ImageManipulation from './components/images/ImageManipulation';
+import Login from '../pages/Login';
+import CreateAccount from '../pages/CreateAccount';
+import ImageManipulation from '../components/images/ImageManipulation';
 
-const Routes = createStackNavigator(
+const LoginStack = createStackNavigator(
     {
         Login: {
             screen: Login,
@@ -31,4 +29,4 @@ const Routes = createStackNavigator(
     }
 )
 
-export default createAppContainer(Routes);
+export default createAppContainer(LoginStack);
